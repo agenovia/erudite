@@ -1,14 +1,26 @@
 #! /usr/bin/env python3
+import sys
 from argparse import ArgumentParser
 
 from utils.extractor import Extract
 
 
+class Parser(ArgumentParser):
+    """Custom parser that always prints help when an error occurs."""
+
+    def error(self, message):
+        sys.stderr.write(f"error: {message}\n")
+        self.print_help()
+        sys.exit(2)
+
+
 def parse_args():
     """Parse command line arguments."""
-    parser = ArgumentParser()
-    subparsers = parser.add_subparsers(dest="command")
-    extract = subparsers.add_parser("extract")
+    parser = Parser()
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    extract = subparsers.add_parser(
+        "extract", help="Extract data from HTML and output to JSON."
+    )
     extract.add_argument(
         "-i",
         "--input",
@@ -29,7 +41,9 @@ def parse_args():
         default=False,
         help="If specified, allows the overwriting of existing files.",
     )
-    load = subparsers.add_parser("load")
+    load = subparsers.add_parser(
+        "load", help="Load JSON files into a Weaviate instance."
+    )
     load.add_argument("-s", "--schema", help="Weaviate schema to load into.")
     load.add_argument(
         "-t", "--target", required=True, help="Full address of weaviate instance."
