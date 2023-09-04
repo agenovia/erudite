@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 from argparse import ArgumentParser
 
-from utils.get_extractor import Extract
+from utils.extractor import Extract
 
 
 def parse_args():
