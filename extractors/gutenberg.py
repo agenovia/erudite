@@ -4,12 +4,12 @@ import json
 import re
 import unicodedata
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet, Tag
 
-from .extractor import Extractor
+from .common import Extractor
 
 
 class TextCleaner:
@@ -49,7 +49,7 @@ class GutenbergExtractor(Extractor):
         """Writes the extracted book to a JSON file"""
         book = Book(self.file).get()
         with open(output, "w", encoding="utf-8") as f:
-            json.dump(book, f, indent=4) # type: ignore
+            json.dump(book, f, indent=4)  # type: ignore
 
 
 class Book:
@@ -67,27 +67,31 @@ class Book:
             return None
 
     @property
-    def title(self) -> str:
+    def title(self) -> Union[str, None]:
         """Return the title of the book"""
 
         def title(element):
             return element.name == "h1" and (element.find_parents()[0].name == "body")
 
-        ret = self.soup.find(title)
-        assert ret is not None
-        return ret.get_text()
+        try:
+            ret = self.soup.find(title)
+            return ret.get_text()  # type: ignore
+        except AttributeError:
+            return None
 
     @property
-    def author(self) -> List[str]:
+    def author(self) -> Union[List[str], None]:
         """Retun the author of the book"""
 
         def author(element):
             return element.name == "h2" and (element.find_parents()[0].name == "body")
 
-        ret = self.soup.find(author)
-        reg = re.compile(r"(?:[A-Z][a-z\-']+\s?){1,}", re.MULTILINE)
-        assert ret is not None
-        return reg.findall(ret.get_text())
+        try:
+            ret = self.soup.find(author)
+            reg = re.compile(r"(?:[A-Z][a-z\-']+\s?){1,}", re.MULTILINE)
+            return reg.findall(ret.get_text()) # type: ignore
+        except AttributeError:
+            return None
 
     @property
     def chapters(self) -> ResultSet:
@@ -144,10 +148,12 @@ class Chapter:
     def title(self):
         """Returns the title of the chapter"""
         tag = self.chapter.find("h2")
-        assert tag is not None
-        regex = re.compile("(?:.*?)(?:\\n|\n)(.*)")
-        match = regex.match(tag.get_text())
-        return match.group(1) if match is not None else None
+        try:
+            regex = re.compile("(?:.*?)(?:\\n|\n)(.*)")
+            match = regex.match(tag.get_text())  # type: ignore
+            return match.group(1) if match is not None else None
+        except AttributeError:
+            return None
 
     @property
     def whole_chapter(self) -> str:
