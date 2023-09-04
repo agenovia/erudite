@@ -66,7 +66,7 @@ class Extract:
         """Extract file using the extractor provided."""
         if os.path.isdir(self.input):
             for file in os.scandir(self.input):
-                if file.name.endswith(".html"):
+                if file.name.lower().endswith(".html"):
                     out = self.output_filepath(file)
                     if os.path.exists(out) and not self.overwrite:
                         raise FileExists(
@@ -74,7 +74,7 @@ class Extract:
                         )
                     self.extractor(file.path).extract(out)
         else:
-            if self.input.endswith(".html"):
+            if self.input.lower().endswith(".html"):
                 out = self.output_filepath(self.input)
                 if os.path.exists(out) and not self.overwrite:
                     raise FileExists(
