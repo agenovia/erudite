@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./erudite.svg" width="500" />
+<img src="./erudite.png" width="500" />
 </p>
 
 ## ℹ️ About erudite
