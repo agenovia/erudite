@@ -57,8 +57,8 @@ class Extract:
             input_filename = os.path.split(file)[-1]
             output_filename = input_filename.replace(".html", ".json")
             return os.path.join(self.output, output_filename)
-        else:
-            return self.output
+
+        return self.output
 
     def run(self):
         """Extract file using the extractor provided."""
@@ -70,7 +70,7 @@ class Extract:
                         raise FileExists(
                             f"{out} already exists and --overwrite flag is not set."
                         )
-                    self.extractor(file.path).extract(out)
+                    self.extractor(file.path).extract(out) # type: ignore
         else:
             if self.input.lower().endswith(".html"):
                 out = self.output_filepath(self.input)
@@ -78,6 +78,6 @@ class Extract:
                     raise FileExists(
                         f"{out} already exists and --overwrite flag is not set."
                     )
-                self.extractor(self.input).extract(out)
+                self.extractor(self.input).extract(out) # type: ignore
             else:
                 raise FileUnsupported(f"{self.input} is not a supported file type.")
