@@ -43,14 +43,12 @@ class Extract:
 
     def get_extractor(self, name):
         """Get an extractor by name."""
-        extractors = {"gutenberg": Extractors.gutenberg}
-
         try:
-            extractor = extractors[name]
+            extractor = Extractors.extractors[name]
             return extractor
         except KeyError as exc:
             raise ExtractorUnsupported(
-                f"'{name}' is not supported format. Please choose from {list(extractors.keys())}"
+                f"'{name}' is not a supported format. Please choose from {list(Extractors.extractors.keys())}"
             ) from exc
 
     def output_filepath(self, file):

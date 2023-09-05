@@ -18,6 +18,7 @@ def parse_args():
     """Parse command line arguments."""
     parser = Parser()
     subparsers = parser.add_subparsers(dest="command", required=True)
+    # extract handles the methods for extracting data from HTML files
     extract = subparsers.add_parser(
         "extract", help="Extract data from HTML and output to JSON."
     )
@@ -31,6 +32,7 @@ def parse_args():
         "-o", "--output_dir", help="Directory to write the JSON files."
     )
     extract.add_argument(
+        "-f",
         "--format",
         required=True,
         help="Extractor format must be present in the extractors directory.",
@@ -41,14 +43,33 @@ def parse_args():
         default=False,
         help="If specified, allows the overwriting of existing files.",
     )
+    # load handles the methods for loading a JSON file into a Weaviate instance
     load = subparsers.add_parser(
         "load", help="Load JSON files into a Weaviate instance."
     )
-    load.add_argument("-s", "--schema", help="Weaviate schema to load into.")
+    load.add_argument(
+        "-i",
+        "--input",
+        required=True,
+        help="Path to .json file or directory containing .json files.",
+    )
     load.add_argument(
         "-t", "--target", required=True, help="Full address of weaviate instance."
     )
-    load.add_argument("--key", help="Weaviate API key.")
+    load.add_argument(
+        "-s",
+        "--schema",
+        required=True,
+        help="The Weaviate schema present in the target database to load into.",
+    )
+    load.add_argument(
+        "-f",
+        "--format",
+        required=True,
+        help="Loader format must be present in the loaders directory.",
+    )
+    load.add_argument("--key", help="Weaviate API key if using WCS.")
+
     return parser.parse_args()
 
 
