@@ -1,3 +1,4 @@
+# Project erudite
 <p align="center">
 <img src="./erudite.png" width="500" />
 </p>
