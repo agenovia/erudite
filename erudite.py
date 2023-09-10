@@ -2,7 +2,7 @@
 import sys
 from argparse import ArgumentParser
 
-from utils.extractor import Extract
+from .utils.extractor import Extract
 
 
 class Parser(ArgumentParser):
