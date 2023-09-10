@@ -26,25 +26,25 @@ class Book(Entry):
             # every time chapters is called, a new chapter object is created
             # we don't want that
             _chap = Chapter(chap, class_name="Chapter")
-            _reference = Reference(
+            _contains = Reference(
                 parent=self, child=_chap, on_parent_property="chapters"
             )
-            _contained_in = Reference(
+            _container = Reference(
                 parent=_chap, child=self, on_parent_property="containedIn"
             )
-            self.add_references([_reference])
-            _chap.add_references([_contained_in])
+            self.add_references([_contains])
+            _chap.add_references([_container])
             yield _chap
 
     def get_meta(self):
         """Get the metainfo of the book."""
         _meta = Meta(self.data, class_name="Meta")
-        _reference = Reference(parent=self, child=_meta, on_parent_property="meta")
-        _contained_in = Reference(
+        _contains = Reference(parent=self, child=_meta, on_parent_property="meta")
+        _container = Reference(
             parent=_meta, child=self, on_parent_property="containedIn"
         )
-        self.add_references([_reference])
-        _meta.add_references([_contained_in])
+        self.add_references([_contains])
+        _meta.add_references([_container])
         return _meta
 
 
