@@ -42,10 +42,7 @@ class Entry(ABC):
         # this must generate a deterministic UUID using the data passed to the class
         return generate_uuid5(identifier=self.data, namespace=self.class_name)
 
-    def add_references(
-        self,
-        references: List[Reference]
-    ) -> None:
+    def add_references(self, references: List[Reference]) -> None:
         """Adds a reference to the entry.
 
         Args:
@@ -119,8 +116,8 @@ class Reference(ABC):
 
 class Collection(ABC):
     """
-    Collection takes in a list of entries and provides a method
-    for yielding a single entry in the list
+    Collection takes in a single object and implements a generator that
+    yields a Weaviate entry when iterated over.
     """
 
     @abstractmethod

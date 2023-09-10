@@ -3,9 +3,11 @@ from __future__ import annotations
 
 from functools import reduce
 from operator import concat
+from weaviate import Client
 from typing import Generator
 
 from .common.types import Collection, Entry, Reference
+from .common.util import WeaviateImporter
 
 
 class Book(Entry):
@@ -100,6 +102,9 @@ class Paragraph(Entry):
 
 
 class BookCollection(Collection):
+    """Book contains at least one chapter, and each chapter contains at least on paragraph.
+    This collection is used to iterate over the book and yield each entry."""
+
     def __init__(self, book: Book):
         self.book = book
 
@@ -112,3 +117,11 @@ class BookCollection(Collection):
         entries = [self.book, self.book.get_meta(), *_chapters, *_paragraphs]
         for entry in entries:
             yield entry
+
+
+def main(json_obj: dict, client: Client, class_name="Book"):
+    """Main function."""
+    book = Book(json_obj, class_name=class_name)
+    book_collection = BookCollection(book)
+    importer = WeaviateImporter(client, book_collection)
+    importer.run()
