@@ -1,4 +1,4 @@
-"""Implement abstract classes for building entries and references to import to Weaviate."""
+"""Base classes for building entries, references and batches to import to Weaviate."""
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -18,11 +18,24 @@ class InvalidReferenceError(Exception):
 class Entry(ABC):
     """An abstract class for a data entry.
 
+    Each object inserted into Weaviate must be of this type. If multiple Entries are to be
+    inserted, then a Batch object must be used that implements the `get_entries` method to
+    yield each Entry.
+
     Args:
-        data (dict):
-            The data to insert.
+        data (dict): The data to insert.
         class_name (str):
-            The name of the class to insert into Weaviate and must already exist in the schema.
+            The name of the class to insert into Weaviate. Must already exist in the schema.
+            Will default to self.__class__.__name__ if not provided.
+
+    Properties:
+        uuid: A UUID5 id generated from the data and class_name.
+        entry: A dictionary to be inserted into Weaviate.
+        has_references: A boolean indicating if the entry has any references attached.
+
+    Methods:
+        add_references: Adds a reference to the entry.
+        get_references: Retrieve all references to this Entry
     """
 
     def __init__(self, data: dict, class_name: str):
@@ -38,7 +51,15 @@ class Entry(ABC):
 
     @property
     def uuid(self) -> str:
-        """Returns a UUID5 based on the data passed to the class."""
+        """Generates a UUID for the entry.
+
+        This method calls weaviate.util.generate_uuid5 using the data as the identifier
+        and self.class_name as the namespace. This ensures uniqueness within the given
+        Weaviate class.
+
+        Returns:
+            str: A UUID5 id.
+        """
         # this must generate a deterministic UUID using the data passed to the class
         return generate_uuid5(identifier=self.data, namespace=self.class_name)
 
@@ -46,8 +67,7 @@ class Entry(ABC):
         """Adds a reference to the entry.
 
         Args:
-            references (List[Reference]):
-                A list of references to add to the entry.
+            references (List[Reference]): A list of references to add to the entry.
 
         Raises:
             InvalidReferenceError:
@@ -63,23 +83,35 @@ class Entry(ABC):
                 self.__references.append(ref)
 
     def get_references(self) -> List[Reference]:
-        """Retrieve all references to this Entry"""
+        """Retrieve all references to this Entry
+
+        Returns:
+            List[Reference]: A list of references to this Entry
+        """
         return self.__references
 
     @property
     def has_references(self) -> bool:
-        """Convenience property for checking if the entry has any references attached."""
+        """Convenience property for checking if the entry has any references attached.
+
+        Returns:
+            bool: True if the entry has references, False otherwise.
+        """
         return any(self.get_references())
 
     @property
     @abstractmethod
     def entry(self) -> dict:
-        """Implement a property that returns a dictionary to be inserted into Weaviate."""
+        """Implement a property that returns a dictionary to be inserted into Weaviate.
+
+        Returns:
+            dict: A dictionary object to be inserted into Weaviate.
+        """
 
 
 @dataclass(frozen=True)
-class Reference(ABC):
-    """Reference defines the relationship between two entries.
+class Reference:
+    """Defines the relationship between two entries.
 
     Behind the scenes, this reference is used to link Weaviate objects together.
     When a reference is present in an entry, a call to the Weaviate client's
@@ -114,10 +146,22 @@ class Reference(ABC):
     on_child_property: Union[str, None] = None
 
 
-class Collection(ABC):
+class Batch(ABC):
     """
-    Collection takes in a single object and implements a generator that
-    yields a Weaviate entry when iterated over.
+    This class is implemented to handle entries with nested sub-entries that must be
+    inserted to Weaviate individually. For example, a book may have multiple chapters,
+    each a separate `Entry` that has a title, a sequence id and a reference to an array of
+    paragraphs, itself containing multiple `Entry` objects with a reference to its parent
+    chapter.
+
+    This class is used to iterate over each sub-entry, add the necessary references
+    (if any) and yield a single entry.
+
+    The importer will then check if the data is a single entry or a collection of entries
+    and call the appropriate method.
+
+    Methods:
+        get_entries: A generator that yields Entry objects.
     """
 
     @abstractmethod

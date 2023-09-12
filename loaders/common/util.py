@@ -1,13 +1,11 @@
-from typing import Union, List
-
-from weaviate import Client
-from weaviate.batch import Batch
-
-from .types import Collection, Entry, Reference
-import multiprocessing as mp
-
-
 import logging
+import multiprocessing as mp
+from typing import List, Union
+
+from weaviate import Client as WeaviateClient
+from weaviate.batch import Batch as WeaviateBatch
+
+from .types import Batch, Entry, Reference
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -21,7 +19,7 @@ class WeaviateImporter:
     of references if an Entry has a Reference attached to it.
     """
 
-    def __init__(self, client: Client, data_object: Union[Entry, Collection]):
+    def __init__(self, client: WeaviateClient, data_object: Union[Entry, Batch]):
         self.client = client
         self.data_object = data_object
         self.logger = logging.getLogger()
@@ -37,10 +35,10 @@ class WeaviateImporter:
         elif level == "debug":
             logging.debug(message)
 
-    def load_collection(self):
-        """Iterates over a Collection and load the contained Entry"""
+    def load_batch(self):
+        """Iterates over a Batch and load the contained Entry"""
         assert isinstance(
-            self.data_object, Collection
+            self.data_object, Batch
         ), f"{self.data_object} is not a Collection object."
         for entry in self.data_object.get_entries():
             self.load_entry(entry)
@@ -65,7 +63,7 @@ class WeaviateImporter:
             batch.flush()
         return ("%s inserted", self)
 
-    def resolve_references(self, batch: Batch, references: List[Reference]):
+    def resolve_references(self, batch: WeaviateBatch, references: List[Reference]):
         """Resolves all references"""
         for ref in references:
             batch.add_reference(
@@ -90,7 +88,7 @@ class WeaviateImporter:
         """Load the Entry or Collection into Weaviate using the provided Client."""
         # is the data passed a single entry or a collection of entries
         logging.info("run")
-        if isinstance(self.data_object, Collection):
-            self.load_collection()
+        if isinstance(self.data_object, Batch):
+            self.load_batch()
         elif isinstance(self.data_object, Entry):
             self.load_entry(self.data_object)
