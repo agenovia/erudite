@@ -41,21 +41,25 @@ class Book(Entry):
         """Get the chapters of the book."""
         for child in self.data["chapters"]:
             chap = Chapter(child, class_name="Chapter")
-            contains = Reference(parent=self, child=chap, on_parent_property="chapters")
-            container = Reference(
-                parent=chap, child=self, on_parent_property="containedIn"
+            reference = Reference(
+                parent=self,
+                child=chap,
+                on_parent_property="chapters",
+                on_child_property="containedIn",
             )
-            self.add_references([contains])
-            chap.add_references([container])
+            self.add_references([reference])
             yield chap
 
     def get_meta(self):
         """Get the metainfo of the book."""
         meta = Meta(self.data, class_name="Meta")
-        contains = Reference(parent=self, child=meta, on_parent_property="meta")
-        container = Reference(parent=meta, child=self, on_parent_property="containedIn")
-        self.add_references([contains])
-        meta.add_references([container])
+        reference = Reference(
+            parent=self,
+            child=meta,
+            on_parent_property="meta",
+            on_child_property="containedIn",
+        )
+        self.add_references([reference])
         return meta
 
 
@@ -99,14 +103,13 @@ class Chapter(Entry):
         """Get the chapter's paragraphs."""
         for child in self.data["paragraphs"]:
             para = Paragraph(child, class_name="Paragraph")
-            contains = Reference(
-                parent=self, child=para, on_parent_property="paragraphs"
+            reference = Reference(
+                parent=self,
+                child=para,
+                on_parent_property="paragraphs",
+                on_child_property="containedIn",
             )
-            container = Reference(
-                parent=para, child=self, on_parent_property="containedIn"
-            )
-            self.add_references([contains])
-            para.add_references([container])
+            self.add_references([reference])
             yield para
 
 

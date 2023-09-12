@@ -123,9 +123,15 @@ class Reference:
             to_object_class_name=<Reference.child.class_name>,
             to_object_uuid=<Reference.child.uuid>,
         )
-    A reference can be added to the child, the parent, or both, but the
+
+    A reference can be added to the child or the parent, but the
     entry object containing the reference must itself be either a parent
     or a child.
+
+    While the same reference can be added to both the child and the parent to
+    establish a two-way reference, it is preferable to specify the `on_child_property`
+    argument instead. WeaviateImporter will ensure that the reference is added
+    properly to the parent and its child.
 
     Args:
         parent (Entry):
@@ -135,9 +141,12 @@ class Reference:
         on_parent_property (str):
             The property on the parent that references the child.
         on_child_property (str):
-            The property on the child that references the parent.
-            This should only be specified if a two-way reference is desired.
-            The child must have a property referencing the parent in the schema.
+            The property on the child that references the parent, used when
+            a two-way reference is desired.
+
+            When adding a two-way reference, first ensure that the child has
+            the necessary property within the Weaviate database schema to
+            reference the parent. Then, specify the property name here.
     """
 
     parent: Entry
