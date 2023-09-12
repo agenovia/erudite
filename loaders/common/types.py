@@ -141,7 +141,7 @@ class Reference:
         on_parent_property (str):
             The property on the parent that references the child.
         on_child_property (str):
-            The property on the child that references the parent, used when
+            The property on the child that references the parent; used when
             a two-way reference is desired.
 
             When adding a two-way reference, first ensure that the child has
@@ -163,8 +163,7 @@ class Batch(ABC):
     paragraphs, itself containing multiple `Entry` objects with a reference to its parent
     chapter.
 
-    This class is used to iterate over each sub-entry, add the necessary references
-    (if any) and yield a single entry.
+    This class is used to iterate over each sub-entry and yield a single entry.
 
     The importer will then check if the data is a single entry or a collection of entries
     and call the appropriate method.
