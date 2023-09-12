@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from functools import reduce
 from operator import concat
-from typing import Generator, List
+from typing import Generator
 
 from weaviate import Client
 
